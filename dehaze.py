@@ -1,3 +1,4 @@
+#coding=utf-8#
 from keras.models import Model
 from keras.layers import Input, Dense, Dropout, BatchNormalization, Conv2D, MaxPooling2D, AveragePooling2D, concatenate,Activation, ZeroPadding2D,UpSampling2D
 from keras.layers import add, Flatten
@@ -6,6 +7,59 @@ from keras.metrics import top_k_categorical_accuracy
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import load_model
 import os
+from PIL import Image
+import numpy as np
+from keras.preprocessing.image import img_to_array
+#load data
+from keras.preprocessing.image import load_img # load an image from file 
+from keras.preprocessing.image import img_to_array # convert the image pixels to a numpy array 
+
+directory = './outdoor/hazy/'
+arr = []
+for imgname in os.listdir(directory):
+	img = Image.open(directory + imgname)
+	img = img.resize((224,224))
+	arr.append(np.array(img))
+	#image = load_img(directory + imgname, target_size=(224, 224)) 
+	#image = img_to_array(image)
+	#arr = np.asarray(img, dtype=np.float32)
+	#arr = img_to_array(img)
+
+x_train = np.array(arr)
+print(x_train.shape)
+'''import matplotlib.pyplot as plt
+plt.imshow(x_train[1])
+plt.show()'''
+
+directoryy = './outdoor/gt/'
+arry = []
+for imgname in os.listdir(directoryy):
+	imgy = Image.open(directoryy + imgname)
+	imgy = imgy.resize((224,224))
+	arry.append(np.array(imgy))
+	#image = load_img(directory + imgname, target_size=(224, 224)) 
+	#image = img_to_array(image)
+	#arr = np.asarray(img, dtype=np.float32)
+	#arr = img_to_array(img)
+
+y_train = np.array(arry)
+print(y_train.shape)
+
+
+#x_train = x_train.reshape(-1,413,550,3)
+#y_train = y_train.reshape(-1,413,550,3)
+
+'''def read_image(imageName):
+    im = Image.open(imageName).convert('L')
+    data = np.array(im)
+    return data
+
+images = []
+for imgname in os.listdir(directory):
+	images.append(read_image(directory + imgname))
+
+x_train = np.array(images)
+print(x_train.shape)'''
 
 def Conv2d_BN(x, nb_filter, kernel_size, strides=(1, 1), padding='same', name=None):
 	if name is not None:
@@ -82,5 +136,12 @@ def GAWN(width,height,channel):
 
 from keras.utils import plot_model
 model = GAWN(224,224,3)
-model.summary()
-plot_model(model, to_file='model.png')
+#model.summary()
+#plot_model(model, to_file='model.png')
+
+#
+model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
+
+model.fit(x_train,y_train,batch_size=32,epochs = 20)
+
+model.save('model.h5')
