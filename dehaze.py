@@ -20,7 +20,7 @@ directory = './outdoor/hazy/'
 arr = []
 for imgname in os.listdir(directory):
 	img = Image.open(directory + imgname)
-	img = img.resize((224,224))
+	img = img.resize((400,400))
 	arr.append(np.array(img))
 x_train = np.array(arr)
 print(x_train.shape)
@@ -32,7 +32,7 @@ directoryy = './outdoor/gt/'
 arry = []
 for imgname in os.listdir(directoryy):
 	imgy = Image.open(directoryy + imgname)
-	imgy = imgy.resize((224,224))
+	imgy = imgy.resize((400,400))
 	arry.append(np.array(imgy))
 y_train = np.array(arry)
 print(y_train.shape)
@@ -98,14 +98,14 @@ def GAWN(width,height,channel):
 
 #conv2_x
 	x=MaxPooling2D(pool_size=(3,3),strides=(2,2),padding='same')(x)
-	x=Conv2d_BN(x,nb_filter=128,kernel_size=(3,3),padding='same')
+	#x=Conv2d_BN(x,nb_filter=128,kernel_size=(3,3),padding='same')
 	x=MaxPooling2D(pool_size=(3,3),strides=(2,2),padding='same')(x)
 
 #conv3_x
-	x = identity2_Block(x, nb_filter=128, kernel_size=(3, 3))
-	x = identity2_Block(x, nb_filter=128, kernel_size=(3, 3))
-	x = identity3_Block(x, nb_filter=128, kernel_size=(3, 3))
-	x = identity4_Block(x, nb_filter=128, kernel_size=(3, 3))
+	x = identity2_Block(x, nb_filter=64, kernel_size=(3, 3))
+	x = identity2_Block(x, nb_filter=64, kernel_size=(3, 3))
+	x = identity3_Block(x, nb_filter=64, kernel_size=(3, 3))
+	x = identity4_Block(x, nb_filter=64, kernel_size=(3, 3))
 
 #conv4_x
 	x = UpSampling2D(size=(2, 2), data_format=None)(x)
@@ -121,13 +121,14 @@ def GAWN(width,height,channel):
 	return model
 
 from keras.utils import plot_model
-model = GAWN(224,224,3)
+model = GAWN(400,400,3)
 model.summary()
 #plot_model(model, to_file='model.png')
 
 
 adam = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
+'''
 tb = TensorBoard(log_dir='./logs',  # log 目录
 	histogram_freq=1,  # 按照何等频率（epoch）来计算直方图，0为不计算
 	batch_size=32,     # 用多大量的数据计算直方图
@@ -138,7 +139,8 @@ tb = TensorBoard(log_dir='./logs',  # log 目录
 	embeddings_layer_names=None, 
 	embeddings_metadata=None)
 callbacks = [tb]
-model.fit(x_train,y_train,batch_size=35,epochs = 1,callbacks=callbacks)
+'''
+model.fit(x_train,y_train,batch_size=35,epochs = 20)
 
 model.save('model.h5')
 
