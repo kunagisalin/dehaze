@@ -15,12 +15,14 @@ from keras.preprocessing.image import img_to_array
 from keras.preprocessing.image import load_img # load an image from file 
 from keras.preprocessing.image import img_to_array # convert the image pixels to a numpy array 
 from keras.callbacks import TensorBoard
+import math
+from keras import backend as K
 
 directory = './outdoor/hazy/'
 arr = []
 for imgname in os.listdir(directory):
 	img = Image.open(directory + imgname)
-	img = img.resize((400,400))
+	img = img.resize((300,300))
 	arr.append(np.array(img))
 x_train = np.array(arr)
 print(x_train.shape)
@@ -32,7 +34,7 @@ directoryy = './outdoor/gt/'
 arry = []
 for imgname in os.listdir(directoryy):
 	imgy = Image.open(directoryy + imgname)
-	imgy = imgy.resize((400,400))
+	imgy = imgy.resize((300,300))
 	arry.append(np.array(imgy))
 y_train = np.array(arry)
 print(y_train.shape)
@@ -121,10 +123,13 @@ def GAWN(width,height,channel):
 	return model
 
 from keras.utils import plot_model
-model = GAWN(400,400,3)
+model = GAWN(300,300,3)
 model.summary()
 #plot_model(model, to_file='model.png')
 
+#psnr
+def psnr(y_ture,y_red):
+	return -10*K.log(K.mean(K.flatten(y_ture - y_red))**2)/np.log(10)
 
 adam = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
@@ -140,7 +145,7 @@ tb = TensorBoard(log_dir='./logs',  # log 目录
 	embeddings_metadata=None)
 callbacks = [tb]
 '''
-model.fit(x_train,y_train,batch_size=35,epochs = 20)
+model.fit(x_train,y_train,batch_size=32,epochs = 20)
 
 model.save('model.h5')
 
